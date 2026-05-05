@@ -377,11 +377,23 @@ void CGame::RemoveModel(int iModel, bool bFromStreaming)
 	}
 }
 // 0.3.7 (������������ 2 ��������� ��������� ��������� � 0.3DL)
-CObject* CGame::NewObject(int iModel, CVector vecPos, CVector vecRot, float fDrawDistance)
+/*CObject* CGame::NewObject(int iModel, CVector vecPos, CVector vecRot, float fDrawDistance)
 {
 	CObject *pObjectNew = new CObject(iModel, vecPos, vecRot, fDrawDistance, 0);
 	return pObjectNew;
+}*/ // +fps
+CObject* CGame::NewObject(int iModel, CVector vecPos, CVector vecRot, float fDrawDistance)
+{
+    // TRAVA GLOBAL DE RENDERIZAÇÃO
+    // Se o objeto for configurado para aparecer longe, a gente "puxa" ele pra perto.
+    if(fDrawDistance > 120.0f) { 
+        fDrawDistance = 120.0f; 
+    }
+
+    CObject *pObjectNew = new CObject(iModel, vecPos, vecRot, fDrawDistance, 0);
+    return pObjectNew;
 }
+
 // 0.3.7 (�� ����������� ������ bIsNPC)
 CPlayerPed* CGame::NewPlayer(int iSkin, float fX, float fY, float fZ, float fRotation, bool unk, bool bIsNPC)
 {
@@ -699,12 +711,22 @@ bool CGame::InitialiseRenderWare() {
     Scene.m_pRwCamera = camera;
     TheCamera.Init();
     TheCamera.SetRwCamera(Scene.m_pRwCamera);
-    RwCameraSetFarClipPlane(Scene.m_pRwCamera, 800.0f);
-    RwCameraSetNearClipPlane(Scene.m_pRwCamera, 0.9f);
+
+	// Mude de 800.0f para algo entre 150.0f e 250.0f
+    RwCameraSetFarClipPlane(Scene.m_pRwCamera, 200.0f); 
+    // E ajuste o NearClip para 0.1f para evitar que objetos sumam quando você encosta neles
+    RwCameraSetNearClipPlane(Scene.m_pRwCamera, 0.1f);
+    // Corrija o Aspect Ratio para a tela do seu Redmi (Geralmente 20:9 ou 16:9)
+    // 4/3 deixa tudo esticado e processa pixels desnecessários nas bordas
+    CameraSize(Scene.m_pRwCamera, nullptr, 0.7f, 20.0f / 9.0f);
+	
+    //RwCameraSetFarClipPlane(Scene.m_pRwCamera, 800.0f);
+    //RwCameraSetNearClipPlane(Scene.m_pRwCamera, 0.9f);	
    // CameraSize(Scene.m_pRwCamera, nullptr, 0.7f, 4.0f / 3.0f);
+	
 	// Teste com 1.2f para ver os personagens bem largos (bom pra mira)
     //CameraSize(Scene.m_pRwCamera, nullptr, 0.7f, 1.2f);
-	CameraSize(Scene.m_pRwCamera, nullptr, 0.7f, 4.0f / 3.0f);
+	//CameraSize(Scene.m_pRwCamera, nullptr, 0.7f, 4.0f / 3.0f);
     RwBBox bb;
     bb.sup = { 10'000.0f,  10'000.0f,  10'000.0f};
     bb.inf = {-10'000.0f, -10'000.0f, -10'000.0f};
