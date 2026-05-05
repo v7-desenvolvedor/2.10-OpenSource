@@ -30,13 +30,20 @@ bool CObjectPool::New(OBJECTID ObjectID, int iModel, CVector vecPos, CVector vec
 		Delete(ObjectID);
 	}
 
+	// --- ADICIONE A TRAVA AQUI ---
+	// Se a distância for maior que 300 (ou o valor que preferir), ele limita.
+	// Isso evita que objetos do servidor forcem o seu celular a renderizar longe demais.
+	if (fDrawDistance > 300.0f) {
+		fDrawDistance = 300.0f; 
+	}
+	// -----------------------------
+
 	m_pObjects[ObjectID] = pGame->NewObject(iModel, vecPos, vecRot, fDrawDistance);
 	if (!m_pObjects[ObjectID]) return false;
 
 	m_bObjectSlotState[ObjectID] = true;
 	return true;
 }
-
 bool CObjectPool::Delete(OBJECTID ObjectID)
 {
 	if (ObjectID < MAX_OBJECTS && m_bObjectSlotState[ObjectID])
